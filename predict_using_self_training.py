@@ -14,7 +14,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import torchvision.utils as vutils
 from PIL import Image
+from tensorboardX import SummaryWriter
 from torch.utils.data import DataLoader, TensorDataset
 
 
@@ -51,11 +53,13 @@ class Net(nn.Module):
         self.conv2 = nn.Conv2d(20, 50, 5, 1)
         self.fc1 = nn.Linear(4 * 4 * 50, 500)
         self.fc2 = nn.Linear(500, 10)
+        self.bn1 = nn.BatchNorm2d(20)
+        self.bn2 = nn.BatchNorm2d(50)
 
     def forward(self, x):
-        x = F.relu(self.conv1(x))
+        x = F.relu(self.bn1(self.conv1(x)))
         x = F.max_pool2d(x, 2, 2)
-        x = F.relu(self.conv2(x))
+        x = F.relu(self.bn2(self.conv2(x)))
         x = F.max_pool2d(x, 2, 2)
         x = x.view(-1, 4 * 4 * 50)
         x = F.relu(self.fc1(x))
@@ -73,10 +77,17 @@ def train(model, device, train_loader, optimizer, epoch):
         loss.backward()
         optimizer.step()
         if batch_idx % 100 == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+            log = 'Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
-                       100. * batch_idx / len(train_loader), loss.item()))
-    torch.save(model, model_save_path)
+                       100. * batch_idx / len(train_loader), loss.item())
+            print(log)
+            x = vutils.make_grid(data, normalize=True, scale_each=True)
+            writer.add_image('Image', x, epoch)
+            writer.add_text('training log', log, epoch)
+            writer.add_scalars('data/loss', {'train loss': loss.item()}, epoch)
+            torch.save(model, model_save_path)
+            for name, param in model.named_parameters():
+                writer.add_histogram(name, param.cpu().clone().data.numpy(), epoch)
 
 
 def test(model, device, test_loader):
@@ -93,7 +104,7 @@ def test(model, device, test_loader):
 
     test_loss /= len(test_loader.dataset)
 
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.3f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
 
@@ -148,11 +159,12 @@ def digit_train():
     X, Y = zip(*Z)
     X, Y = np.array(X)[:, np.newaxis, :, :], np.array(Y)
     gap = int(0.7 * len(Z))
-    X_train, Y_train, X_test, Y_test = X[:gap], Y[:gap], X[gap:], Y[gap:]
-    train_set, test_set = TensorDataset(torch.FloatTensor(X_train),
-                                        torch.LongTensor(Y_train)), \
-                          TensorDataset(torch.FloatTensor(X_test),
-                                        torch.LongTensor(Y_test))
+    X_train = torch.FloatTensor(X[:gap])
+    Y_train = torch.LongTensor(Y[:gap])
+    X_test = torch.FloatTensor(X[gap:])
+    Y_test = torch.LongTensor(Y[gap:])
+    train_set, test_set = TensorDataset(X_train, Y_train), \
+                          TensorDataset(X_test, Y_test)
     train_loader = torch.utils.data.DataLoader(
         train_set,
         batch_size=64, shuffle=True, **kwargs)
@@ -161,6 +173,7 @@ def digit_train():
         batch_size=64, shuffle=True, **kwargs)
 
     model = Net().to(device)
+    writer.add_graph(Net(), (torch.rand(64, 1, 28, 28)))
     optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
 
     if need_to_retrain or not os.path.exists(model_save_path):
@@ -169,17 +182,25 @@ def digit_train():
             test(model, device, test_loader)
     else:
         model = torch.load(model_save_path)
+    writer.add_embedding(
+        X_train.view((-1, target_size * target_size)),
+        metadata=Y_train,
+        label_img=X_train
+    )
+    writer.export_scalars_to_json('./all_scalars.json')
+    writer.close()
+    os.startfile('logdir.bat')
     test(model, device, test_loader)  # for mnist test
     predict(model, device, test_imgs)  # for chenyu test
 
 
 def split_and_get_digit_figure():
     counter = collections.defaultdict(int)
-    for fi, f in enumerate(list_all_files('20190828')):
+    for fi, f in enumerate(list_all_files(dataset_path)):
         img = Image.open(f)
-        print(f)
         labels = re.findall(r'\\(\d*)[._ (]', f)[0]
-        print(fi, f, img.size, labels)
+        if fi % 300 == 0:
+            print(fi, f, img.size, labels)
         # 二值化，切割，放缩
         img = img.crop((0, 80, 160, 110))
         grey_img = img.convert('L')
@@ -205,18 +226,22 @@ def split_and_get_digit_figure():
 
 if __name__ == '__main__':
     torch.manual_seed(1)
+    need_to_re_cut_figure = False
     need_to_retrain = True  # os.path.exists('model.mdl')
     max_epochs = 20
-    use_cuda = False
+    use_cuda = True
     learning_rate = 0.01
     momentum = 0.5
     target_size = 28  # to fit mnist figures
     number_of_digits = 5
     model_save_path = 'model_digit.mdl'
     data_path = 'data.txt'  # don't change
+    dataset_path = '20190919'
 
     test_imgs = get_test_dataset()
-    test_imgs = test_imgs[np.random.choice(range(test_imgs.shape[0]),100),:,:]
+    test_imgs = test_imgs[np.random.choice(range(test_imgs.shape[0]), 100), :, :]
     print(test_imgs.shape)
-    # split_and_get_digit_figure()
+    if need_to_re_cut_figure:
+        split_and_get_digit_figure()
+    writer = SummaryWriter()
     digit_train()
