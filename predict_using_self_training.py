@@ -114,7 +114,7 @@ def predict(model, device, pred):
             output = model(data)
             pred_label = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
             if i < 16:
-                plt.title(f'prediction: {str(pred_label.item() + 1)}')
+                plt.title(f'prediction: {str(pred_label.item())}')
     plt.show()
 
 
@@ -170,7 +170,7 @@ def digit_train():
     else:
         model = torch.load(model_save_path)
     test(model, device, test_loader)  # for mnist test
-    # predict(model, device, test_imgs)  # for chenyu test
+    predict(model, device, test_imgs)  # for chenyu test
 
 
 def split_and_get_digit_figure():
@@ -192,6 +192,10 @@ def split_and_get_digit_figure():
             grey_imgs[i].width * (i + 1) // number_of_digits,
             grey_imgs[i].height
         )).resize((target_size, target_size), Image.ANTIALIAS) for i in range(number_of_digits)]
+        # if fi == 0:
+        #     img.save(labels+'.png')
+        #     for i, d in enumerate(digits):
+        #         d.save(labels[i]+ '_'+str(i)+'_.png')
         if not os.path.exists('data'):
             os.mkdir('data')
         for i in range(number_of_digits):
@@ -203,7 +207,7 @@ if __name__ == '__main__':
     torch.manual_seed(1)
     need_to_retrain = True  # os.path.exists('model.mdl')
     max_epochs = 20
-    use_cuda = True
+    use_cuda = False
     learning_rate = 0.01
     momentum = 0.5
     target_size = 28  # to fit mnist figures
@@ -211,6 +215,8 @@ if __name__ == '__main__':
     model_save_path = 'model_digit.mdl'
     data_path = 'data.txt'  # don't change
 
-    # test_imgs = get_test_dataset()
-    split_and_get_digit_figure()
+    test_imgs = get_test_dataset()
+    test_imgs = test_imgs[np.random.choice(range(test_imgs.shape[0]),100),:,:]
+    print(test_imgs.shape)
+    # split_and_get_digit_figure()
     digit_train()
