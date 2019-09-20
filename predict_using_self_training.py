@@ -236,7 +236,7 @@ if __name__ == '__main__':
     number_of_digits = 5
     model_save_path = 'model_digit.mdl'
     data_path = 'data.txt'  # don't change
-    dataset_path = '20190919'
+    dataset_path = 'raw_digits'
 
     test_imgs = get_test_dataset()
     test_imgs = test_imgs[np.random.choice(range(test_imgs.shape[0]), 100), :, :]

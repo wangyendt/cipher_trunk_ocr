@@ -172,7 +172,7 @@ def mnist_train():
 
 def split_and_get_digit_figure():
     ind = 1
-    for fi, f in enumerate(list_all_files('20190828')):
+    for fi, f in enumerate(list_all_files('raw_digits', [], ['0920'])):
         img = Image.open(f)
         print(fi, f, img.size)
         # 二值化，切割，放缩
