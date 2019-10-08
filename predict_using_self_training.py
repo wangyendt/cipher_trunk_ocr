@@ -129,16 +129,32 @@ def predict(model, device, pred):
     plt.show()
 
 
+def error_analyse(model, device, test_loader):
+    model.eval()
+    with torch.no_grad():
+        for data, target in test_loader:
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+            target = target.view_as(pred)
+            print(target.size(), data.size(), pred.size())
+            for i in range(len(target)):
+                if target[i] != pred[i]:
+                    plt.imshow(data[i].cpu().numpy().squeeze())
+                    plt.title(f'label:{target[i]}, predict:{pred[i]}')
+                plt.show()
+
+
 def get_test_dataset():
     if not os.path.exists(data_path):
         test_imgs = np.empty((0, target_size, target_size))
-        for f in list_all_files('data'):
+        for f in list_all_files(data_dir):
             print(f)
             data = np.loadtxt(f)[np.newaxis, :, :]
             test_imgs = np.vstack((test_imgs, data))
         with open(data_path, 'w') as outfile:
             for slice_2d in test_imgs:
-                np.savetxt(outfile, slice_2d)
+                np.savetxt(outfile, slice_2d, fmt='%d')
                 outfile.write('# New slice\n')  # slice row
     else:
         test_imgs = np.loadtxt(data_path).reshape((-1, target_size, target_size))
@@ -150,7 +166,7 @@ def digit_train():
 
     kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
     X, Y = [], []
-    for f in list_all_files('data'):
+    for f in list_all_files(data_dir):
         X.append(np.loadtxt(f))
         Y.append(int(re.findall(r'\\(\d*)[_.]', f)[0]))
     print(X[0].shape, Y[0])
@@ -192,6 +208,7 @@ def digit_train():
     os.startfile('logdir.bat')
     test(model, device, test_loader)  # for mnist test
     predict(model, device, test_imgs)  # for chenyu test
+    error_analyse(model, device, test_loader)  # for error analyse
 
 
 def split_and_get_digit_figure():
@@ -202,7 +219,8 @@ def split_and_get_digit_figure():
         if fi % 300 == 0:
             print(fi, f, img.size, labels)
         # 二值化，切割，放缩
-        img = img.crop((0, 80, 160, 110))
+        if img.size[1] == 120:
+            img = img.crop((0, 80, 160, 110))
         grey_img = img.convert('L')
         img_generator = lambda thd: grey_img.point([0 if i < thd else 1 for i in range(256)], '1')
         grey_imgs = [img_generator(th) for th in [60, 100, 150, 100, 60]]  # 切割得到清晰的数字
@@ -217,30 +235,34 @@ def split_and_get_digit_figure():
         #     img.save(labels+'.png')
         #     for i, d in enumerate(digits):
         #         d.save(labels[i]+ '_'+str(i)+'_.png')
-        if not os.path.exists('data'):
-            os.mkdir('data')
+        if not os.path.exists(data_dir):
+            os.mkdir(data_dir)
         for i in range(number_of_digits):
-            np.savetxt('data//' + labels[i] + '_' + str(counter[labels[i]] + 1) + '.txt', digits[i])
+            np.savetxt(f'{data_dir}//{labels[i]}_{counter[labels[i]] + 1}.txt',
+                       digits[i], fmt='%d'
+                       )
             counter[labels[i]] += 1
 
 
 if __name__ == '__main__':
     torch.manual_seed(1)
+    np.random.seed(1)
     need_to_re_cut_figure = False
-    need_to_retrain = True  # os.path.exists('model.mdl')
+    need_to_retrain = False  # os.path.exists('model.mdl')
     max_epochs = 20
     use_cuda = True
     learning_rate = 0.01
     momentum = 0.5
     target_size = 28  # to fit mnist figures
     number_of_digits = 5
+    data_dir = 'data'
     model_save_path = 'model_digit.mdl'
     data_path = 'data.txt'  # don't change
     dataset_path = 'raw_digits'
 
-    test_imgs = get_test_dataset()
-    test_imgs = test_imgs[np.random.choice(range(test_imgs.shape[0]), 100), :, :]
-    print(test_imgs.shape)
+    all_test_imgs = get_test_dataset()
+    test_imgs = all_test_imgs[np.random.choice(range(all_test_imgs.shape[0]), 100), :, :]
+    print(all_test_imgs.shape, test_imgs.shape)
     if need_to_re_cut_figure:
         split_and_get_digit_figure()
     writer = SummaryWriter()
