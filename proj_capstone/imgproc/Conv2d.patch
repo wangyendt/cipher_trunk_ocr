@@ -1,0 +1,56 @@
+--- C:\Users\wang1\AppData\Local\Continuum\anaconda3\lib\site-packages\torch\nn\modules\conv.py
++++ C:\Users\wang1\AppData\Local\Continuum\anaconda3\lib\site-packages\torch\nn\modules\conv.py
+@@ -37,7 +37,7 @@
+           concatenated.
+         * At groups= :attr:`in_channels`, each input channel is convolved with
+           its own set of filters, of size:
+-          :math:`\left\lfloor\frac{C_\text{out}}{C_\text{in}}\right\rfloor`.
++          :math:`\left\lfloor\frac{out\_channels}{in\_channels}\right\rfloor`.
+ 
+     The parameters :attr:`kernel_size`, :attr:`stride`, :attr:`padding`, :attr:`dilation` can either be:
+ 
+@@ -70,6 +70,7 @@
+         kernel_size (int or tuple): Size of the convolving kernel
+         stride (int or tuple, optional): Stride of the convolution. Default: 1
+         padding (int or tuple, optional): Zero-padding added to both sides of the input. Default: 0
++        padding_mode (string, optional). Accepted values `zeros` and `circular` Default: `zeros`
+         dilation (int or tuple, optional): Spacing between kernel elements. Default: 1
+         groups (int, optional): Number of blocked connections from input channels to output channels. Default: 1
+         bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
+@@ -88,7 +89,8 @@
+ 
+     Attributes:
+         weight (Tensor): the learnable weights of the module of shape
+-                         (out_channels, in_channels, kernel_size[0], kernel_size[1]).
++                         :math:`(\text{out\_channels}, \frac{\text{in\_channels}}{\text{groups}},`
++                         :math:`\text{kernel\_size[0]}, \text{kernel\_size[1]})`.
+                          The values of these weights are sampled from
+                          :math:`\mathcal{U}(-\sqrt{k}, \sqrt{k})` where
+                          :math:`k = \frac{1}{C_\text{in} * \prod_{i=0}^{1}\text{kernel\_size}[i]}`
+@@ -115,17 +117,24 @@
+         https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md
+     """
+     def __init__(self, in_channels, out_channels, kernel_size, stride=1,
+-                 padding=0, dilation=1, groups=1, bias=True):
++                 padding=0, dilation=1, groups=1,
++                 bias=True, padding_mode='zeros'):
+         kernel_size = _pair(kernel_size)
+         stride = _pair(stride)
+         padding = _pair(padding)
+         dilation = _pair(dilation)
+         super(Conv2d, self).__init__(
+             in_channels, out_channels, kernel_size, stride, padding, dilation,
+-            False, _pair(0), groups, bias)
++            False, _pair(0), groups, bias, padding_mode)
+ 
+     @weak_script_method
+     def forward(self, input):
++        if self.padding_mode == 'circular':
++            expanded_padding = ((self.padding[1] + 1) // 2, self.padding[1] // 2,
++                                (self.padding[0] + 1) // 2, self.padding[0] // 2)
++            return F.conv2d(F.pad(input, expanded_padding, mode='circular'),
++                            self.weight, self.bias, self.stride,
++                            _pair(0), self.dilation, self.groups)
+         return F.conv2d(input, self.weight, self.bias, self.stride,
+                         self.padding, self.dilation, self.groups)
+ 

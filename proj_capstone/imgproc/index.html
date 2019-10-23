@@ -1,0 +1,217 @@
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>图像识别</title>
+		<link rel="stylesheet" type="text/css" href="./layui/css/layui.css" />
+		<script src="./layui/layui.js"></script>
+	</head>
+<body>
+	<div class="layui-row">
+		<div class="layui-col-md8" style="height:100%;">
+			<div class="layui-row">
+			  <div class="layui-col-md9" style="height:10%;">
+				<div class="layui-form" style="margin-top: 10px;">
+					<div class="layui-form-item">
+						<label class="layui-form-label">路径</label>
+						<div class="layui-input-inline" style="width:70%">
+							<input type="text" name="password" lay-verify="pass" placeholder="" autocomplete="off" class="layui-input">
+						</div>
+						<div class="layui-form-mid layui-word-aux" style="margin-top: -10px;">
+							<button type="button" class="layui-btn layui-btn-normal">文件夹</button>
+						</div>
+					</div>
+				</div>
+			  </div>
+			  <div class="layui-col-md3" style="height:10%;">
+					<div class="layui-form-item" style="margin-top:5px">
+						<div class="layui-row">
+							<div class="layui-col-md12">
+								<button type="button" class="layui-btn layui-btn-primary layui-btn-sm">批量识别</button>
+							</div>
+						</div>
+						<div class="layui-row" style="margin-top:5px">
+							<div class="layui-col-md12">
+								<button type="button" class="layui-btn layui-btn-sm">另&nbsp;&nbsp;存&nbsp;&nbsp;为</button>
+							</div>
+						</div>	
+					</div>	
+			  </div>	
+			  <div class="layui-col-md12" style="height:78%;">
+				<div class="layui-row layui-col-md12">
+				  <div class="layui-col-md3" style="height:100%;overflow: scroll;">
+					<blockquote class="layui-elem-quote layui-quote-nm">文件列表</blockquote>
+					<table class="layui-table">
+						<thead>
+							<tr>
+								<th>序号</th>
+								<th>文件名</th>
+							</tr> 
+						</thead>
+						<tbody>
+							<tr>
+								<td>1</td>
+								<td>123.png</td>
+							</tr>
+							<tr>
+								<td>2</td>
+								<td>456.png</td>
+							</tr>
+							
+						</tbody>
+					</table>
+				  </div>
+				  <div class="layui-col-md6" style="height:100%;">
+					<blockquote class="layui-elem-quote layui-quote-nm">图像</blockquote>
+					<img src="./img.jpeg" height="85%" width="100%"/>
+				  </div>
+				  <div class="layui-col-md3" style="height:100%;">
+					<blockquote class="layui-elem-quote layui-quote-nm">识别结果</blockquote>
+					<p style="text-align: center;color:#01AAED">88888</p>
+				  </div>
+				</div>
+			  </div>
+			  <div class="layui-col-md12" style="height:10%;">
+				<div class="layui-row layui-col-md12" style="background: #eeeeee;text-align: center;padding-top:2px;padding-bottom: 2px">
+					总数：<span>2</span> &nbsp;&nbsp;&nbsp;&nbsp;正确数：<span>2</span> &nbsp;&nbsp;&nbsp;&nbsp;错误数： <span>0</span> &nbsp;&nbsp;&nbsp;&nbsp;正确率： <span>100%</span>
+				</div>
+				<div class="layui-row layui-col-md12" style="margin-top: 1px;">
+					<div class="layui-form-item">
+						<div class="layui-input-inline" style="width:90%">
+							<input type="text" name="password" lay-verify="pass" placeholder="" autocomplete="off" class="layui-input">
+						</div>
+						<div class="layui-form-mid layui-word-aux" style="margin-top: -10px;">
+							<button type="button" class="layui-btn layui-btn-normal">清空</button>
+						</div>
+					</div>
+				</div>
+			  </div>
+			</div>  
+		</div>
+		<div class="layui-col-md4 layui-form" style="height:100%;">
+			<div style="width:100%;height:155px;">
+				<div style="height:95%;width:95%;margin:0 auto;border:1px solid #dddddd;">
+					<div class="layui-form-item">
+						<label class="layui-form-label">端口选择</label>
+						<div class="layui-input-block" style="width:50%">
+						  <select name="city" lay-verify="required">
+							<option value=""></option>
+							<option value="0">北京</option>
+							<option value="1">上海</option>
+						  </select>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">速率选择</label>
+						<div class="layui-input-block" style="width:50%">
+						  <select name="city" lay-verify="required">
+							<option value=""></option>
+							<option value="0">北京</option>
+							<option value="1">上海</option>
+						  </select>
+						</div>
+					</div>
+					<div class="layui-form-item" style="text-align:center">
+						<button type="button" class="layui-btn layui-btn-primary" style="padding-left:50px;padding-right:50px">open</button>
+					</div>
+				</div>
+			</div>
+			<div style="width:100%;height:90px;">
+				<div style="height:95%;width:95%;margin:0 auto;">
+					<fieldset class="layui-elem-field">
+					  <legend>尺寸</legend>
+					  <div class="layui-field-box">
+						<div class="layui-form-item" style="margin-bottom: 0px">
+							<div class="layui-input-block">
+							  <input type="radio" name="size" value="1" title="160*120">
+							  <input type="radio" name="size" value="2" title="160*32" checked>
+							</div>
+						</div>
+					  </div>
+					</fieldset>
+				</div>
+			</div>
+			<div style="width:100%;height:90px;">
+				<div style="height:95%;width:95%;margin:0 auto;">
+					<fieldset class="layui-elem-field">
+					  <legend>传送方式</legend>
+					  <div class="layui-field-box">
+						<div class="layui-form-item" style="margin-bottom: 0px">
+							<div class="layui-input-block">
+							  <input type="radio" name="way" value="1" title="一次性">
+							  <input type="radio" name="way" value="2" title="每次512字节" checked>
+							</div>
+						</div>
+					  </div>
+					</fieldset>
+				</div>
+			</div>
+			<div style="width:100%;height:250px;">
+				<div style="height:95%;width:95%;margin:0 auto;">
+					<fieldset class="layui-elem-field">
+						<legend>其 他</legend>
+						<div class="layui-field-box">
+							<div class="layui-form-item" style="margin-bottom: 10px">
+								<label class="layui-form-label">路 径</label>
+								<div class="layui-input-inline">
+								  <input type="file" name="password" lay-verify="pass" placeholder="" autocomplete="off" class="layui-input">
+								</div>
+							</div>
+							<div class="layui-form-item" style="margin-bottom: 10px">
+								<label class="layui-form-label">地 址</label>
+								<div class="layui-input-inline">
+								  <input type="text" name="password" lay-verify="pass" placeholder="0" autocomplete="off" class="layui-input">
+								</div>
+							</div>
+							<div class="layui-form-item" style="margin-bottom: 10px">
+								<label class="layui-form-label">连续间隔</label>
+								<div class="layui-input-inline">
+								  <input type="text" name="password" lay-verify="pass" placeholder="3" autocomplete="off" class="layui-input">
+								</div>
+								<div class="layui-form-mid layui-word-aux">秒</div>
+							</div>
+							<div class="layui-form-item" style="margin-bottom: 10px">
+								<div class="layui-input-block">
+								  <input type="checkbox" name="like[write]" title="拍照">
+								  <input type="checkbox" name="like[read]" title="识别" checked="">
+								  <input type="checkbox" name="like[game]" title="自动保存">
+								</div>
+							</div>
+						</div>
+					</fieldset>
+				</div>
+			</div>
+			<div style="width:100%;height:100px;margin-top:15px">
+				<div style="height:95%;width:95%;margin:0 auto;">
+					<div class="layui-form-item">
+						<div class="layui-row">
+							<div class="layui-col-md4">
+								<button type="button" class="layui-btn layui-btn-primary">单张拍照</button>
+							</div>
+							<div class="layui-col-md4">
+								<button type="button" class="layui-btn">连续拍照</button>
+							</div>
+							<div class="layui-col-md4">
+								<button type="button" class="layui-btn layui-btn-normal">停止拍照</button>
+							</div>
+						</div>
+						<div class="layui-row" style="margin-top: 5px">
+							<div class="layui-col-md4">
+								<button type="button" class="layui-btn layui-btn-warm">设置地址</button>
+							</div>
+							<div class="layui-col-md4">
+								<button type="button" class="layui-btn layui-btn-danger">退 出</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div> 
+	<script>
+	layui.use('form', function(){
+	  var form = layui.form;
+	 
+	});
+	</script>
+</body>
+</html>

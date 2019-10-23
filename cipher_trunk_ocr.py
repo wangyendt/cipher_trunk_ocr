@@ -43,6 +43,7 @@ class Classifier:
         if not os.path.exists(self.model_save_path):
             print('model file does not exist! (模型文件不存在, 请联系模型提供者)')
         self.model = torch.load(self.model_save_path).cpu()
+        torch.save(self.model, 'model_digit_cpu.mdl')
         self.model.eval()
 
     def fetch_digits_from_image(self, img_path):
