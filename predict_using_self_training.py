@@ -220,7 +220,7 @@ def split_and_get_digit_figure():
             print(fi, f, img.size, labels)
         # 二值化，切割，放缩
         if img.size[1] == 120:
-            img = img.crop((0, 80, 160, 110))
+            img = img.crop((0, 78, 160, 110))
         grey_img = img.convert('L')
         img_generator = lambda thd: grey_img.point([0 if i < thd else 1 for i in range(256)], '1')
         grey_imgs = [img_generator(th) for th in [60, 100, 150, 100, 60]]  # 切割得到清晰的数字

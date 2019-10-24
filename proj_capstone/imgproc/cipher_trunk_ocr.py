@@ -122,7 +122,7 @@ class Classifier:
         # grey_img = denoise(grey_img,grey_img,0.9)[0]
         plt.subplot(4, 1, 3)
         plt.imshow(grey_img)
-        grey_img = np.uint8(histeq(grey_img)[0])
+        grey_img = histeq(grey_img)[0]
         plt.subplot(4, 1, 4)
         plt.imshow(grey_img)
         grey_img = np.uint8(grey_img)
