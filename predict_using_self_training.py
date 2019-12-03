@@ -236,7 +236,7 @@ def split_and_get_digit_figure():
         #     for i, d in enumerate(digits):
         #         d.save(labels[i]+ '_'+str(i)+'_.png')
         if not os.path.exists(data_dir):
-            os.mkdir(data_dir)
+            os.makedirs(data_dir)
         for i in range(number_of_digits):
             np.savetxt(f'{data_dir}//{labels[i]}_{counter[labels[i]] + 1}.txt',
                        digits[i], fmt='%d'
@@ -247,8 +247,8 @@ def split_and_get_digit_figure():
 if __name__ == '__main__':
     torch.manual_seed(1)
     np.random.seed(1)
-    need_to_re_cut_figure = False
-    need_to_retrain = False  # os.path.exists('model.mdl')
+    need_to_re_cut_figure = True
+    need_to_retrain = True  # os.path.exists('model.mdl')
     max_epochs = 20
     use_cuda = True
     learning_rate = 0.01
